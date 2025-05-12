@@ -1,0 +1,371 @@
+---
+title: "Attending to Grammar Cues: L2 Learners' Processing of Grammatical Gender Agreement"
+subtitle: "Eyetracking behavioral data"
+author: "Jorge Vargas Mutizabal"
+institute: "Rutgers - The State University of New Jersey"
+date: "(updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    css: ["hygge", "rutgers", "rutgers-fonts"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+# Background 
+
+The phrase structure of Spanish can have grammatical gender cues, which allow speakers to predict the gender of upcoming lexical units. 
+
+##Phrase conditions:
+1. La casa (determiner and noun)
+2. Su casa (noun)
+3. La mente (determiner)
+4. Su mente ( - )
+
+## La casa **linda**
+
+---
+
+#Research questions:
+## - How do low proficiency Spanish L2 learners process grammatical gender agreement with adjectives in the different phrase conditions? 
+
+## - Do reaction times and accuracy vary with the phrase conditions?
+
+---
+#Analysis
+Preparation: Load library 
+```{r fig.height=3, fig.width=3}
+library(tidyverse)
+library(dplyr)
+library(stringr)
+library(here)
+library(lmerTest)
+library(lme4)
+library(ggpubr)
+library(ggplot2)
+```
+---
+##Data was uploaded and inspected to prepare tidying 
+```{r fig.height=4, fig.width=4}
+data <- read.csv(here("data", "Behavioral_nat.csv"))
+```
+
+##Inspected the data
+```{r}
+glimpse(data)
+```
+---
+#Tidying
+- To get the conditions as C1, C2, C3, C4, what came before the _ was removed. 
+```{r}
+data_tidy <- data|>
+  mutate(Condition = sub(".*_", "", Condition))|>
+  separate(ID, into = c("Session", "ID"), sep = 1)
+ 
+write.csv(data_tidy, file = here("clean_data", "data_tidy.csv"))
+```
+
+- Glimpse again  
+```{r}
+glimpse(data_tidy)
+```
+---
+##RTs only correct responses are analyzed: create a data frame for RT with correct responses
+
+```{r}
+data_tidy_RT <- data_tidy|>
+  filter(Accuracy == 1)
+```
+---
+
+```{r}
+# Checking distribution of RTs to remove possible outliers
+ggplot(data_tidy_RT, aes(x = RT)) + 
+  geom_histogram(bins = 30, fill = "red") +
+  theme_minimal() +
+  ggtitle("Distribution of Reaction Time")
+```
+## get the count before outliers
+```{r}
+
+nrow(data_tidy_RT)
+```
+
+---
+##Calculating quantiles
+```{r}
+Q1 <- quantile(data$RT, 0.25, na.rm = TRUE)
+Q3 <- quantile(data$RT, 0.75, na.rm = TRUE)
+IQR_value <- Q3 - Q1
+
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+
+data_tidy_RT_1 <- data_tidy_RT[data_tidy_RT$RT >= lower_bound & data_tidy_RT$RT <= upper_bound, ]
+```
+
+---
+### Checking distribution of RTs to remove outliers
+
+```{r}
+
+ggplot(data_tidy_RT_1, aes(x = RT)) + 
+  geom_histogram(bins = 30, fill = "red") +
+  theme_minimal() +
+  ggtitle("Distribution of Reaction Time")
+```
+---
+###Checking the number of removed outliers
+```{r}
+cat("Removed", nrow(data_tidy_RT) - nrow(data_tidy_RT_1), "outliers.")
+```
+
+total now
+```{r}
+nrow(data_tidy_RT_1)
+```
+
+---
+-The sessions represent the pre and posttest with A and B, respectively. 
+- Filter to analyze participants with ID starting with A (pretest) and creating a new data frame
+```{r fig.height=2, fig.width=2}
+data_tidy_A <- data_tidy |>
+  filter(Session == "A")
+```
+- Another data frame for RT because (incorrect answers and outliers removed)
+```{r}
+data_tidy_RT_A <- data_tidy_RT_1|>
+  filter(Session == "A")
+```
+
+##Calculate mean accuracy per condition for pretest
+```{r}
+ Accuracy_A <- data_tidy_A|>
+  group_by(Condition)|>
+  summarise(mean_accuracy = mean(Accuracy))
+knitr::kable(Accuracy_A)
+
+```
+
+---
+##Calculate mean RT per condition for pretest
+```{r}
+RT_A <- data_tidy_RT_A|>
+  group_by(Condition)|>
+  summarise(mean_RT = mean(RT))
+knitr::kable(RT_A)
+```
+
+---
+####### The same but for B (posttest)
+
+- Filter to analyze participants with ID starting with B and creating a new data frame
+```{r fig.height=2, fig.width=2}
+data_tidy_B <- data_tidy |>
+  filter(Session == "B")
+```
+- Filter for RT data frame
+```{r}
+data_tidy_RT_B <- data_tidy_RT_1 |>
+  filter(Session == "B")
+```
+
+```{r}
+##Mean Accuracy
+Accuracy_B <- data_tidy_B|>
+  group_by(Condition)|>
+  summarise(mean_accuracy = mean(Accuracy))
+knitr::kable(Accuracy_B)
+```
+##Calculate mean RT per condition
+```{r}
+RT_B <- data_tidy_RT_B|>
+  group_by(Condition)|>
+  summarise(mean_RT = mean(RT))
+knitr::kable(RT_B)
+```
+---
+
+##Plot Accuracy: pre and posttest:
+
+```{r}
+Acc_A <- Accuracy_A|>
+  mutate(Session = "A")
+
+Acc_B <- Accuracy_B|>
+  mutate(Session = "B")
+
+combined_data <- bind_rows(Acc_A, Acc_B)
+
+```
+
+```{r}
+ggplot(combined_data, aes(x = Condition, y = mean_accuracy, fill = Session)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Condition", y = "Average Percentage", title = "Mean Accuracy between pre and posttest", fill = "Session") +
+  scale_fill_manual(
+    values = c("A" = "#800000", "B" = "#0073C2"),  # granate and blue
+    labels = c("A" = "Pretest", "B" = "Posttest")
+  ) +
+  theme_minimal()
+
+```
+##Plot Reaction Time: pre and posttest
+
+```{r}
+RT_A_1 <- RT_A|>
+  mutate(Session = "A")
+
+RT_B_1 <- RT_B|>
+  mutate(Session = "B")
+
+combined_data <- bind_rows(RT_A_1, RT_B_1)
+
+```
+
+```{r}
+ggplot(combined_data, aes(x = Condition, y = mean_RT, fill = Session)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Condition", y = "Reaction times (ms)", title = "Mean RT for the pre and posttest", fill = "Session") +
+  scale_fill_manual(
+    values = c("A" = "orange", "B" = "grey"),  # granate and blue
+    labels = c("A" = "Pretest", "B" = "Posttest")
+  ) +
+  theme_minimal()
+
+```
+
+---
+#Models to compare between the pre and posttest
+##ACC: Logistic regression with glmer
+
+```{r}
+
+data_tidy$Condition <- factor(data_tidy$Condition)  
+data_tidy$Condition <- relevel(data_tidy$Condition, ref = "C1")  
+
+
+model_acc_AB <- glmer(Accuracy ~ Session * Condition + (1 + Session * Condition | ID) + (1 | Item), 
+  data = data_tidy, 
+  family = binomial, control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+summary(model_acc_AB)
+
+#saveRDS(model_acc_AB, "models") #write path
+```
+
+##RTs
+
+##Reference 
+```{r}
+data_tidy_RT_1$Condition <- factor(data_tidy_RT_1$Condition)
+data_tidy_RT_1$Condition <- relevel(data_tidy_RT_1$Condition, ref = "C1")
+
+```
+
+
+---
+
+- Nested model comparison for ACC
+
+##to get main effects 
+##effect of predictor and interaction 
+
+##Null model, only accuracy - but first, refence for intercepts 
+```{r}
+data_tidy$Condition <- factor(data_tidy$Condition)
+data_tidy$Condition <- relevel(data_tidy$Condition, ref = "C1")
+
+```
+
+```{r}
+model_0_acc <- glmer(Accuracy ~ 1 + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy, family = binomial)
+
+summary(model_0_acc)
+```
+## Model 1, effect of accuracy by condition 
+
+```{r}
+model_1_acc <- glmer(Accuracy ~ Session + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy, family = binomial)
+
+summary(model_1_acc)
+```
+##Model 2, effect of accuracy by group 
+
+```{r}
+model_2_acc <- glmer(Accuracy ~ Session + Condition + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy, family = binomial)
+
+summary(model_2_acc)
+
+#saveRDS(model_2_acc, here("models", "model_2_acc_AB.rds")) #write path
+```
+##Model 3, effect of interaction with condition 
+
+```{r}
+
+model_3_acc <- glmer(Accuracy ~ Session * Condition + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy, family = binomial)
+
+summary(model_3_acc)
+```
+
+##Testing the models 
+```{r}
+anova(model_0_acc, model_1_acc, model_2_acc, model_3_acc, test = "Chisq")
+
+```
+
+
+
+- Nested model comparison for RT
+
+##to get main effects 
+##effect of predictor and interaction 
+
+##Null model, only RT
+```{r}
+data_tidy_RT_1$Condition <- factor(data_tidy_RT_1$Condition)
+data_tidy_RT_1$Condition <- relevel(data_tidy_RT_1$Condition, ref = "C1")
+
+```
+
+```{r}
+model_0_rt <- lmer(RT ~ 1 + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy_RT_1)
+
+summary(model_0_rt)
+```
+## Model 1, effect of RT by session
+
+```{r}
+model_1_rt <- lmer(RT ~ Session + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy_RT_1)
+
+summary(model_1_rt)
+```
+##Model 2, effect of RT by session + condition
+
+```{r}
+model_2_rt <- lmer(RT ~ Session + Condition + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy_RT_1)
+
+summary(model_2_rt)
+```
+##Model 3, effect of interaction with condition 
+
+```{r}
+
+model_3_rt <- lmer(RT ~ Session * Condition + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy_RT_1)
+
+summary(model_3_rt)
+```
+
+```{r}
+anova(model_0_rt, model_1_rt, model_2_rt, model_3_rt, test = "Chisq")
+
+```
+
+
+
+
+
+
