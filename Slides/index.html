@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Attending to Grammar Cues: L2 Learners’ Processing of Grammatical Gender Agreement</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Jorge Vargas Mutizabal" />
+    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/hygge.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/rutgers.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/rutgers-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Attending to Grammar Cues: L2 Learners’ Processing of Grammatical Gender Agreement
+]
+.subtitle[
+## Eyetracking behavioral data
+]
+.author[
+### Jorge Vargas Mutizabal
+]
+.institute[
+### Rutgers - The State University of New Jersey
+]
+.date[
+### (updated: 2025-05-12)
+]
+
+---
+
+#The outcome is a presentation
+
+# Background 
+
+The phrase structure of Spanish can have grammatical gender cues, which allow speakers to predict the gender of upcoming lexical units. 
+
+##Phrase conditions:
+1. La casa (determiner and noun)
+2. Su casa (noun)
+3. La mente (determiner)
+4. Su mente ( - )
+
+## La casa **linda**
+
+---
+
+#Research questions:
+## - How do low proficiency Spanish L2 learners process grammatical gender agreement with adjectives in the different phrase conditions? 
+
+## - Do reaction times and accuracy vary with the phrase conditions?
+
+---
+#Analysis
+Preparation: Load library 
+
+``` r
+library(tidyverse)
+```
+
+```
+## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.2     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors
+```
+
+``` r
+library(dplyr)
+library(stringr)
+library(here)
+```
+
+```
+## here() starts at /Users/jorgevargasmutizabal/Desktop/Final_project
+```
+
+``` r
+library(lmerTest)
+```
+
+```
+## Loading required package: lme4
+## Loading required package: Matrix
+## 
+## Attaching package: 'Matrix'
+## 
+## The following objects are masked from 'package:tidyr':
+## 
+##     expand, pack, unpack
+## 
+## 
+## Attaching package: 'lmerTest'
+## 
+## The following object is masked from 'package:lme4':
+## 
+##     lmer
+## 
+## The following object is masked from 'package:stats':
+## 
+##     step
+```
+
+``` r
+library(lme4)
+library(ggpubr)
+library(ggplot2)
+```
+---
+##Data was uploaded and inspected to prepare tidying 
+
+``` r
+data &lt;- read.csv(here("data", "data_1", "Behavioral_nat.csv"))
+```
+
+##Inspected the data
+
+``` r
+glimpse(data)
+```
+
+```
+## Rows: 1,452
+## Columns: 8
+## $ ID                &lt;chr&gt; "A13", "A13", "A13", "A13", "A13", "A13", "A13", "A1…
+## $ Condition         &lt;chr&gt; "PD_C4", "D07_C3", "D26_C4", "D11_C3", "D17_C1", "D1…
+## $ sentence          &lt;chr&gt; "Dice que la mochila rallada contiene nuestras cosas…
+## $ noun_transparency &lt;chr&gt; "transp", "opaq", "opaq", "opaq", "transp", "opaq", …
+## $ noun              &lt;chr&gt; "mochila", "borrador", "religión", "hospital", "anil…
+## $ Item              &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1…
+## $ RT                &lt;int&gt; 5174, 2787, 2886, 3447, 2789, 3226, 3852, 4467, 6400…
+## $ Accuracy          &lt;int&gt; 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0…
+```
+---
+#Tidying
+- To get the conditions as C1, C2, C3, C4, what came before the _ was removed. 
+
+``` r
+data_tidy &lt;- data|&gt;
+  mutate(Condition = sub(".*_", "", Condition))|&gt;
+  separate(ID, into = c("Session", "ID"), sep = 1)
+ 
+write.csv(data_tidy, file = here("data","clean_data", "data_tidy.csv"))
+```
+
+- Glimpse again  
+
+``` r
+glimpse(data_tidy)
+```
+
+```
+## Rows: 1,452
+## Columns: 9
+## $ Session           &lt;chr&gt; "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A…
+## $ ID                &lt;chr&gt; "13", "13", "13", "13", "13", "13", "13", "13", "13"…
+## $ Condition         &lt;chr&gt; "C4", "C3", "C4", "C3", "C1", "C3", "C1", "C1", "C4"…
+## $ sentence          &lt;chr&gt; "Dice que la mochila rallada contiene nuestras cosas…
+## $ noun_transparency &lt;chr&gt; "transp", "opaq", "opaq", "opaq", "transp", "opaq", …
+## $ noun              &lt;chr&gt; "mochila", "borrador", "religión", "hospital", "anil…
+## $ Item              &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1…
+## $ RT                &lt;int&gt; 5174, 2787, 2886, 3447, 2789, 3226, 3852, 4467, 6400…
+## $ Accuracy          &lt;int&gt; 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0…
+```
+---
+##RTs only correct responses are analyzed: create a data frame for RT with correct responses
+
+
+``` r
+data_tidy_RT &lt;- data_tidy|&gt;
+  filter(Accuracy == 1)
+```
+---
+
+
+``` r
+# Checking distribution of RTs to remove possible outliers
+ggplot(data_tidy_RT, aes(x = RT)) + 
+  geom_histogram(bins = 30, fill = "red") +
+  theme_minimal() +
+  ggtitle("Distribution of Reaction Time")
+```
+
+![](index_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+## get the count before outliers
+
+``` r
+nrow(data_tidy_RT)
+```
+
+```
+## [1] 1343
+```
+
+---
+##Calculating quantiles
+
+``` r
+Q1 &lt;- quantile(data$RT, 0.25, na.rm = TRUE)
+Q3 &lt;- quantile(data$RT, 0.75, na.rm = TRUE)
+IQR_value &lt;- Q3 - Q1
+
+lower_bound &lt;- Q1 - 1.5 * IQR_value
+upper_bound &lt;- Q3 + 1.5 * IQR_value
+
+data_tidy_RT_1 &lt;- data_tidy_RT[data_tidy_RT$RT &gt;= lower_bound &amp; data_tidy_RT$RT &lt;= upper_bound, ]
+```
+
+---
+### Checking distribution of RTs to remove outliers
+
+
+``` r
+ggplot(data_tidy_RT_1, aes(x = RT)) + 
+  geom_histogram(bins = 30, fill = "red") +
+  theme_minimal() +
+  ggtitle("Distribution of Reaction Time")
+```
+
+![](index_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+---
+###Checking the number of removed outliers
+
+``` r
+cat("Removed", nrow(data_tidy_RT) - nrow(data_tidy_RT_1), "outliers.")
+```
+
+```
+## Removed 44 outliers.
+```
+
+total now
+
+``` r
+nrow(data_tidy_RT_1)
+```
+
+```
+## [1] 1299
+```
+
+---
+-The sessions represent the pre and posttest with A and B, respectively. 
+- Filter to analyze participants with ID starting with A (pretest) and creating a new data frame
+
+``` r
+data_tidy_A &lt;- data_tidy |&gt;
+  filter(Session == "A")
+```
+- Another data frame for RT because (incorrect answers and outliers removed)
+
+``` r
+data_tidy_RT_A &lt;- data_tidy_RT_1|&gt;
+  filter(Session == "A")
+```
+---
+##Calculate mean accuracy per condition for pretest
+
+``` r
+ Accuracy_A &lt;- data_tidy_A|&gt;
+  group_by(Condition)|&gt;
+  summarise(mean_accuracy = mean(Accuracy))
+knitr::kable(Accuracy_A)
+```
+
+
+
+|Condition | mean_accuracy|
+|:---------|-------------:|
+|C1        |     0.9659091|
+|C2        |     0.9488636|
+|C3        |     0.9375000|
+|C4        |     0.7272727|
+
+---
+##Calculate mean RT per condition for pretest
+
+``` r
+RT_A &lt;- data_tidy_RT_A|&gt;
+  group_by(Condition)|&gt;
+  summarise(mean_RT = mean(RT))
+knitr::kable(RT_A)
+```
+
+
+
+|Condition |  mean_RT|
+|:---------|--------:|
+|C1        | 2386.864|
+|C2        | 2580.248|
+|C3        | 2471.586|
+|C4        | 2439.449|
+
+---
+####### The same but for B (posttest)
+
+- Filter to analyze participants with ID starting with B and creating a new data frame
+
+``` r
+data_tidy_B &lt;- data_tidy |&gt;
+  filter(Session == "B")
+```
+- Filter for RT data frame
+
+``` r
+data_tidy_RT_B &lt;- data_tidy_RT_1 |&gt;
+  filter(Session == "B")
+```
+---
+
+``` r
+##Mean Accuracy
+Accuracy_B &lt;- data_tidy_B|&gt;
+  group_by(Condition)|&gt;
+  summarise(mean_accuracy = mean(Accuracy))
+knitr::kable(Accuracy_B)
+```
+
+
+
+|Condition | mean_accuracy|
+|:---------|-------------:|
+|C1        |     0.9761905|
+|C2        |     0.9821429|
+|C3        |     0.9702381|
+|C4        |     0.9153439|
+##Calculate mean RT per condition
+
+``` r
+RT_B &lt;- data_tidy_RT_B|&gt;
+  group_by(Condition)|&gt;
+  summarise(mean_RT = mean(RT))
+knitr::kable(RT_B)
+```
+
+
+
+|Condition |  mean_RT|
+|:---------|--------:|
+|C1        | 2014.317|
+|C2        | 2143.479|
+|C3        | 2171.528|
+|C4        | 2280.675|
+---
+
+##Plot Accuracy: pre and posttest:
+
+
+``` r
+Acc_A &lt;- Accuracy_A|&gt;
+  mutate(Session = "A")
+
+Acc_B &lt;- Accuracy_B|&gt;
+  mutate(Session = "B")
+
+combined_data &lt;- bind_rows(Acc_A, Acc_B)
+```
+
+
+``` r
+ggplot(combined_data, aes(x = Condition, y = mean_accuracy, fill = Session)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Condition", y = "Average Percentage", title = "Mean Accuracy between pre and posttest", fill = "Session") +
+  scale_fill_manual(
+    values = c("A" = "#800000", "B" = "#0073C2"),  # granate and blue
+    labels = c("A" = "Pretest", "B" = "Posttest")
+  ) +
+  theme_minimal()
+```
+
+![](index_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+---
+##Plot Reaction Time: pre and posttest
+
+
+``` r
+RT_A_1 &lt;- RT_A|&gt;
+  mutate(Session = "A")
+
+RT_B_1 &lt;- RT_B|&gt;
+  mutate(Session = "B")
+
+combined_data &lt;- bind_rows(RT_A_1, RT_B_1)
+```
+
+
+``` r
+ggplot(combined_data, aes(x = Condition, y = mean_RT, fill = Session)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Condition", y = "Reaction times (ms)", title = "Mean RT for the pre and posttest", fill = "Session") +
+  scale_fill_manual(
+    values = c("A" = "orange", "B" = "grey"),  # granate and blue
+    labels = c("A" = "Pretest", "B" = "Posttest")
+  ) +
+  theme_minimal()
+```
+
+![](index_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
+
+---
+#Models to compare between the pre and posttest
+
+##RTs
+
+##Reference 
+
+- Nested model comparison for ACC
+
+##to get main effects 
+##effect of predictor and interaction 
+
+##Null model, only accuracy - but first, refence for intercepts 
+
+``` r
+data_tidy$Condition &lt;- factor(data_tidy$Condition)
+data_tidy$Condition &lt;- relevel(data_tidy$Condition, ref = "C1")
+```
+
+
+``` r
+model_0_acc &lt;- glmer(Accuracy ~ 1 + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy, family = binomial)
+```
+
+```
+## Warning in commonArgs(par, fn, control, environment()): maxfun &lt; 10 *
+## length(par)^2 is not recommended.
+```
+
+```
+## Warning in optwrap(optimizer, devfun, start, rho$lower, control = control, :
+## convergence code 1 from bobyqa: bobyqa -- maximum number of function
+## evaluations exceeded
+```
+
+```
+## Warning in (function (fn, par, lower = rep.int(-Inf, n), upper = rep.int(Inf, :
+## failure to converge in 10000 evaluations
+```
+
+```
+## Warning in optwrap(optimizer, devfun, start, rho$lower, control = control, :
+## convergence code 4 from Nelder_Mead: failure to converge in 10000 evaluations
+```
+
+```
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## unable to evaluate scaled gradient
+```
+
+```
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## Model failed to converge: degenerate Hessian with 12 negative eigenvalues
+```
+
+``` r
+summary(model_0_acc)
+```
+
+```
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Accuracy ~ 1 + (1 + Session * Condition | ID) + (1 | Item)
+##    Data: data_tidy
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    731.0   1153.5   -285.5    571.0     1372 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -6.9497  0.1169  0.1567  0.2032  2.8524 
+## 
+## Random effects:
+##  Groups Name                 Variance  Std.Dev. Corr                         
+##  Item   (Intercept)          2.035e-01 0.451093                              
+##  ID     (Intercept)          1.899e-06 0.001378                              
+##         SessionA             6.976e-01 0.835242 -0.82                        
+##         SessionB             3.755e-01 0.612770  1.00 -0.79                  
+##         ConditionC2          7.621e-03 0.087296  0.87 -0.98  0.85            
+##         ConditionC3          5.393e-03 0.073439  0.55 -0.53  0.56  0.47      
+##         ConditionC4          3.665e-03 0.060541  0.85 -0.74  0.84  0.75  0.43
+##         SessionA:ConditionC2 2.926e+00 1.710533  0.81 -0.92  0.78  0.92  0.49
+##         SessionB:ConditionC2 1.360e+00 1.166346 -0.73  0.23 -0.76 -0.33 -0.29
+##         SessionA:ConditionC3 3.421e-01 0.584899  0.61 -0.23  0.63  0.30  0.20
+##         SessionB:ConditionC3 6.314e-01 0.794614 -0.65  0.29 -0.67 -0.35 -0.39
+##         SessionA:ConditionC4 1.203e+01 3.467911  0.37 -0.04  0.40  0.13  0.06
+##         SessionB:ConditionC4 4.088e+00 2.021850 -0.35  0.57 -0.33 -0.56 -0.23
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##   0.64                              
+##  -0.64 -0.29                        
+##   0.67  0.06 -0.83                  
+##  -0.69 -0.11  0.81 -0.98            
+##   0.22  0.37 -0.64  0.14 -0.10      
+##  -0.14 -0.81 -0.11  0.50 -0.47 -0.40
+## Number of obs: 1452, groups:  Item, 33; ID, 23
+## 
+## Fixed effects:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   3.6597     0.2524    14.5   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## optimizer (Nelder_Mead) convergence code: 4 (failure to converge in 10000 evaluations)
+## unable to evaluate scaled gradient
+## Model failed to converge: degenerate  Hessian with 12 negative eigenvalues
+## failure to converge in 10000 evaluations
+```
+---
+
+## Model 1, effect of accuracy by condition 
+
+
+``` r
+model_1_acc &lt;- glmer(Accuracy ~ Session + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy, family = binomial)
+```
+
+```
+## Warning in commonArgs(par, fn, control, environment()): maxfun &lt; 10 *
+## length(par)^2 is not recommended.
+```
+
+```
+## Warning in optwrap(optimizer, devfun, start, rho$lower, control = control, :
+## convergence code 1 from bobyqa: bobyqa -- maximum number of function
+## evaluations exceeded
+```
+
+```
+## Warning in (function (fn, par, lower = rep.int(-Inf, n), upper = rep.int(Inf, :
+## failure to converge in 10000 evaluations
+```
+
+```
+## Warning in optwrap(optimizer, devfun, start, rho$lower, control = control, :
+## convergence code 4 from Nelder_Mead: failure to converge in 10000 evaluations
+```
+
+```
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## unable to evaluate scaled gradient
+```
+
+```
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## Model failed to converge: degenerate Hessian with 14 negative eigenvalues
+```
+
+``` r
+summary(model_1_acc)
+```
+
+```
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Accuracy ~ Session + (1 + Session * Condition | ID) + (1 | Item)
+##    Data: data_tidy
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    730.0   1163.1   -283.0    566.0     1370 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -7.0613  0.0971  0.1517  0.2188  2.7768 
+## 
+## Random effects:
+##  Groups Name                 Variance  Std.Dev.  Corr                         
+##  Item   (Intercept)          1.950e-01 0.4416065                              
+##  ID     (Intercept)          2.278e-07 0.0004773                              
+##         SessionA             1.206e-01 0.3472619  1.00                        
+##         SessionB             1.485e+00 1.2187981 -0.34 -0.32                  
+##         ConditionC2          4.665e-02 0.2159881  0.14  0.14 -0.88            
+##         ConditionC3          4.456e-02 0.2110842  0.54  0.54 -0.33  0.49      
+##         ConditionC4          4.555e-02 0.2134155  0.68  0.67 -0.75  0.58  0.64
+##         SessionA:ConditionC2 1.119e+00 1.0577816 -0.85 -0.84  0.66 -0.33 -0.39
+##         SessionB:ConditionC2 3.483e+00 1.8663330 -0.20 -0.21 -0.84  0.79  0.12
+##         SessionA:ConditionC3 2.079e-01 0.4559566  0.11  0.11  0.50 -0.83 -0.63
+##         SessionB:ConditionC3 1.799e+00 1.3412123 -0.31 -0.32 -0.60  0.81  0.17
+##         SessionA:ConditionC4 1.064e+01 3.2622433  0.19  0.21  0.24  0.07  0.22
+##         SessionB:ConditionC4 6.581e+00 2.5654271  0.79  0.78 -0.43  0.01  0.13
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##  -0.84                              
+##   0.47 -0.24                        
+##  -0.35 -0.09 -0.57                  
+##   0.11  0.15  0.75 -0.78            
+##  -0.19  0.24 -0.49 -0.26  0.01      
+##   0.61 -0.92  0.04  0.44 -0.35 -0.36
+## Number of obs: 1452, groups:  Item, 33; ID, 23
+## 
+## Fixed effects:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   3.5468     1.0658   3.328 0.000875 ***
+## SessionA     -0.3621     1.0908  -0.332 0.739955    
+## SessionB      0.7450     1.1568   0.644 0.519560    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##          (Intr) SessnA
+## SessionA -0.966       
+## SessionB -0.911  0.889
+## optimizer (Nelder_Mead) convergence code: 4 (failure to converge in 10000 evaluations)
+## unable to evaluate scaled gradient
+## Model failed to converge: degenerate  Hessian with 14 negative eigenvalues
+## failure to converge in 10000 evaluations
+```
+##Model 2, effect of accuracy by group 
+
+
+``` r
+model_2_acc &lt;- glmer(Accuracy ~ Session + Condition + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy, family = binomial)
+```
+
+```
+## Warning in commonArgs(par, fn, control, environment()): maxfun &lt; 10 *
+## length(par)^2 is not recommended.
+```
+
+```
+## Warning in optwrap(optimizer, devfun, start, rho$lower, control = control, :
+## convergence code 1 from bobyqa: bobyqa -- maximum number of function
+## evaluations exceeded
+```
+
+```
+## Warning in (function (fn, par, lower = rep.int(-Inf, n), upper = rep.int(Inf, :
+## failure to converge in 10000 evaluations
+```
+
+```
+## Warning in optwrap(optimizer, devfun, start, rho$lower, control = control, :
+## convergence code 4 from Nelder_Mead: failure to converge in 10000 evaluations
+```
+
+```
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## unable to evaluate scaled gradient
+```
+
+```
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## Model failed to converge: degenerate Hessian with 10 negative eigenvalues
+```
+
+``` r
+summary(model_2_acc)
+```
+
+```
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Accuracy ~ Session + Condition + (1 + Session * Condition | ID) +  
+##     (1 | Item)
+##    Data: data_tidy
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    730.6   1179.4   -280.3    560.6     1367 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -6.7089  0.0847  0.1403  0.2133  2.7265 
+## 
+## Random effects:
+##  Groups Name                 Variance Std.Dev. Corr                         
+##  Item   (Intercept)           0.2009  0.4483                                
+##  ID     (Intercept)           1.3299  1.1532                                
+##         SessionA              0.5804  0.7618   -0.54                        
+##         SessionB              2.3695  1.5393   -0.18 -0.49                  
+##         ConditionC2           9.4766  3.0784   -1.00  0.53  0.17            
+##         ConditionC3          13.4765  3.6710   -0.99  0.50  0.24  0.99      
+##         ConditionC4          17.6023  4.1955   -1.00  0.53  0.12  1.00  0.99
+##         SessionA:ConditionC2  6.5780  2.5648    0.85 -0.85  0.28 -0.84 -0.80
+##         SessionB:ConditionC2  7.8107  2.7948    0.61 -0.11 -0.79 -0.59 -0.64
+##         SessionA:ConditionC3 10.3393  3.2155    0.98 -0.58 -0.14 -0.98 -0.99
+##         SessionB:ConditionC3 11.5404  3.3971    0.88 -0.29 -0.58 -0.87 -0.90
+##         SessionA:ConditionC4 17.7077  4.2081    0.75 -0.29  0.16 -0.76 -0.70
+##         SessionB:ConditionC4 18.7048  4.3249    0.79 -0.09 -0.49 -0.80 -0.84
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##  -0.85                              
+##  -0.55  0.31                        
+##  -0.98  0.83  0.57                  
+##  -0.85  0.61  0.89  0.84            
+##  -0.78  0.72  0.11  0.66  0.51      
+##  -0.79  0.38  0.59  0.83  0.77  0.46
+## Number of obs: 1452, groups:  Item, 33; ID, 23
+## 
+## Fixed effects:
+##             Estimate Std. Error z value Pr(&gt;|z|)  
+## (Intercept)   3.8578     2.0074   1.922   0.0546 .
+## SessionA     -0.0671     2.0551  -0.033   0.9740  
+## SessionB      1.2034     2.0908   0.576   0.5649  
+## ConditionC2  -0.3450     0.8173  -0.422   0.6729  
+## ConditionC3  -0.9470     0.7002  -1.352   0.1762  
+## ConditionC4  -1.4154     0.8643  -1.638   0.1015  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) SessnA SessnB CndtC2 CndtC3
+## SessionA    -0.947                            
+## SessionB    -0.926  0.963                     
+## ConditionC2 -0.080 -0.171 -0.170              
+## ConditionC3 -0.086 -0.198 -0.181  0.703       
+## ConditionC4 -0.090 -0.121 -0.207  0.548  0.643
+## optimizer (Nelder_Mead) convergence code: 4 (failure to converge in 10000 evaluations)
+## unable to evaluate scaled gradient
+## Model failed to converge: degenerate  Hessian with 10 negative eigenvalues
+## failure to converge in 10000 evaluations
+```
+
+``` r
+#saveRDS(model_2_acc, here("models", "model_2_acc_AB.rds")) #write path
+```
+##Model 3, effect of interaction with condition 
+
+
+``` r
+model_3_acc &lt;- glmer(Accuracy ~ Session * Condition + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy, family = binomial)
+```
+
+```
+## Warning in commonArgs(par, fn, control, environment()): maxfun &lt; 10 *
+## length(par)^2 is not recommended.
+```
+
+```
+## Warning in (function (fn, par, lower = rep.int(-Inf, n), upper = rep.int(Inf, :
+## failure to converge in 10000 evaluations
+```
+
+```
+## Warning in optwrap(optimizer, devfun, start, rho$lower, control = control, :
+## convergence code 4 from Nelder_Mead: failure to converge in 10000 evaluations
+```
+
+```
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## unable to evaluate scaled gradient
+```
+
+```
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+## Model failed to converge: degenerate Hessian with 22 negative eigenvalues
+```
+
+``` r
+summary(model_3_acc)
+```
+
+```
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: Accuracy ~ Session * Condition + (1 + Session * Condition | ID) +  
+##     (1 | Item)
+##    Data: data_tidy
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    739.7   1220.3   -278.9    557.7     1361 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -6.0617  0.0924  0.1444  0.2105  2.7075 
+## 
+## Random effects:
+##  Groups Name                 Variance  Std.Dev.  Corr                         
+##  Item   (Intercept)          1.925e-01 0.4387013                              
+##  ID     (Intercept)          1.912e-07 0.0004372                              
+##         SessionA             1.102e+00 1.0497715  0.28                        
+##         SessionB             2.068e+00 1.4380620 -0.01 -0.16                  
+##         ConditionC2          1.211e+00 1.1005728 -0.14 -0.69 -0.45            
+##         ConditionC3          5.261e-01 0.7253044 -0.25 -0.30 -0.67  0.67      
+##         ConditionC4          1.284e+00 1.1332056  0.23  0.18 -0.18 -0.20 -0.05
+##         SessionA:ConditionC2 1.759e+00 1.3261086 -0.23 -0.56  0.82 -0.13 -0.37
+##         SessionB:ConditionC2 3.370e+00 1.8357138 -0.26  0.07 -0.82  0.38  0.61
+##         SessionA:ConditionC3 8.724e-01 0.9340350  0.07 -0.47  0.69 -0.13 -0.64
+##         SessionB:ConditionC3 1.051e+00 1.0249581  0.13  0.34 -0.69  0.22  0.17
+##         SessionA:ConditionC4 5.683e+00 2.3838725 -0.27 -0.23  0.39  0.01 -0.08
+##         SessionB:ConditionC4 4.333e+00 2.0816518  0.27  0.28 -0.66  0.05  0.32
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##  -0.19                              
+##  -0.31 -0.58                        
+##   0.07  0.68 -0.65                  
+##  -0.23 -0.60  0.75 -0.58            
+##   0.01  0.57 -0.36  0.06 -0.19      
+##   0.21 -0.75  0.50 -0.28  0.26 -0.86
+## Number of obs: 1452, groups:  Item, 33; ID, 23
+## 
+## Fixed effects:
+##                      Estimate Std. Error z value Pr(&gt;|z|)  
+## (Intercept)             2.203      1.169   1.885   0.0595 .
+## SessionA                1.738      1.410   1.233   0.2177  
+## SessionB                2.417      1.695   1.426   0.1538  
+## ConditionC2            17.441    146.425   0.119   0.9052  
+## ConditionC3            17.029    124.079   0.137   0.8908  
+## ConditionC4            17.182    374.394   0.046   0.9634  
+## SessionA:ConditionC2  -18.164    146.466  -0.124   0.9013  
+## SessionB:ConditionC2  -16.988    146.485  -0.116   0.9077  
+## SessionA:ConditionC3  -18.055    124.059  -0.146   0.8843  
+## SessionB:ConditionC3  -17.834    123.785  -0.144   0.8854  
+## SessionA:ConditionC4  -18.982    374.345  -0.051   0.9596  
+## SessionB:ConditionC4  -17.979    374.667  -0.048   0.9617  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) SessnA SessnB CndtC2 CndtC3 CndtC4 SA:CC2 SB:CC2 SA:CC3
+## SessionA    -0.823                                                        
+## SessionB    -0.689  0.571                                                 
+## ConditionC2 -0.027  0.038  0.138                                          
+## ConditionC3  0.022 -0.030 -0.102 -0.486                                   
+## ConditionC4 -0.031  0.042  0.139  0.957 -0.707                            
+## SssnA:CndC2  0.027 -0.041 -0.138 -1.000  0.486 -0.957                     
+## SssnB:CndC2  0.027 -0.038 -0.144 -1.000  0.486 -0.957  1.000              
+## SssnA:CndC3 -0.022  0.026  0.102  0.486 -1.000  0.707 -0.486 -0.486       
+## SssnB:CndC3 -0.022  0.030  0.095  0.484 -1.000  0.706 -0.484 -0.484  1.000
+## SssnA:CndC4  0.031 -0.043 -0.139 -0.957  0.707 -1.000  0.957  0.957 -0.707
+## SssnB:CndC4  0.031 -0.042 -0.142 -0.957  0.707 -1.000  0.957  0.957 -0.707
+##             SB:CC3 SA:CC4
+## SessionA                 
+## SessionB                 
+## ConditionC2              
+## ConditionC3              
+## ConditionC4              
+## SssnA:CndC2              
+## SssnB:CndC2              
+## SssnA:CndC3              
+## SssnB:CndC3              
+## SssnA:CndC4 -0.706       
+## SssnB:CndC4 -0.706  1.000
+## optimizer (Nelder_Mead) convergence code: 4 (failure to converge in 10000 evaluations)
+## unable to evaluate scaled gradient
+## Model failed to converge: degenerate  Hessian with 22 negative eigenvalues
+## failure to converge in 10000 evaluations
+```
+---
+##Anova test
+##Testing the models 
+
+``` r
+anova(model_0_acc, model_1_acc, model_2_acc, model_3_acc, test = "Chisq")
+```
+
+```
+## Data: data_tidy
+## Models:
+## model_0_acc: Accuracy ~ 1 + (1 + Session * Condition | ID) + (1 | Item)
+## model_1_acc: Accuracy ~ Session + (1 + Session * Condition | ID) + (1 | Item)
+## model_2_acc: Accuracy ~ Session + Condition + (1 + Session * Condition | ID) + (1 | Item)
+## model_3_acc: Accuracy ~ Session * Condition + (1 + Session * Condition | ID) + (1 | Item)
+##             npar    AIC    BIC  logLik deviance  Chisq Df Pr(&gt;Chisq)  
+## model_0_acc   80 731.03 1153.5 -285.51   571.03                       
+## model_1_acc   82 730.04 1163.1 -283.02   566.04 4.9868  2    0.08263 .
+## model_2_acc   85 730.56 1179.4 -280.28   560.56 5.4868  3    0.13943  
+## model_3_acc   91 739.74 1220.3 -278.87   557.74 2.8153  6    0.83164  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+
+- Nested model comparison for RT
+
+##to get main effects 
+##effect of predictor and interaction 
+
+##Null model, only RT
+
+``` r
+data_tidy_RT_1$Condition &lt;- factor(data_tidy_RT_1$Condition)
+data_tidy_RT_1$Condition &lt;- relevel(data_tidy_RT_1$Condition, ref = "C1")
+```
+
+
+``` r
+model_0_rt &lt;- lmer(RT ~ 1 + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy_RT_1)
+```
+
+```
+## boundary (singular) fit: see help('isSingular')
+```
+
+```
+## Warning: Model failed to converge with 5 negative eigenvalues: -5.1e-03
+## -9.8e-03 -2.9e-02 -2.9e-02 -3.3e-02
+```
+
+``` r
+summary(model_0_rt)
+```
+
+```
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: RT ~ 1 + (1 + Session * Condition | ID) + (1 | Item)
+##    Data: data_tidy_RT_1
+## 
+## REML criterion at convergence: 19777.5
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.0704 -0.5430 -0.0849  0.4717  6.0408 
+## 
+## Random effects:
+##  Groups   Name                 Variance Std.Dev. Corr                         
+##  Item     (Intercept)          223308   472.6                                 
+##  ID       (Intercept)           27863   166.9                                 
+##           SessionA             282672   531.7     0.45                        
+##           SessionB             329289   573.8     0.81  0.51                  
+##           ConditionC2           59490   243.9    -1.00 -0.45 -0.80            
+##           ConditionC3           58724   242.3    -1.00 -0.45 -0.80  1.00      
+##           ConditionC4          157852   397.3    -1.00 -0.44 -0.80  1.00  1.00
+##           SessionA:ConditionC2  58670   242.2     0.59  0.41  0.13 -0.59 -0.59
+##           SessionB:ConditionC2  65273   255.5     0.77  0.51  0.37 -0.77 -0.77
+##           SessionA:ConditionC3  33817   183.9     0.85  0.29  0.45 -0.86 -0.86
+##           SessionB:ConditionC3  65851   256.6     0.71  0.57  0.31 -0.71 -0.71
+##           SessionA:ConditionC4  83188   288.4     0.87  0.19  0.65 -0.87 -0.87
+##           SessionB:ConditionC4 127379   356.9     0.88  0.71  0.59 -0.88 -0.88
+##  Residual                      190221   436.1                                 
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##  -0.59                              
+##  -0.77  0.94                        
+##  -0.86  0.80  0.93                  
+##  -0.71  0.97  0.97  0.82            
+##  -0.87  0.37  0.61  0.84  0.46      
+##  -0.88  0.78  0.89  0.82  0.90  0.69
+##                                     
+## Number of obs: 1299, groups:  Item, 33; ID, 23
+## 
+## Fixed effects:
+##             Estimate Std. Error     df t value Pr(&gt;|t|)    
+## (Intercept)   2484.3      105.0   28.8   23.66   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## optimizer (nloptwrap) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+```
+---
+## Model 1, effect of RT by session
+
+
+``` r
+model_1_rt &lt;- lmer(RT ~ Session + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy_RT_1)
+```
+
+```
+## boundary (singular) fit: see help('isSingular')
+```
+
+```
+## Warning: Model failed to converge with 8 negative eigenvalues: -5.9e-03
+## -7.1e-03 -7.2e-03 -1.1e-02 -1.3e-02 -2.1e-02 -2.8e-02 -6.1e-02
+```
+
+``` r
+summary(model_1_rt)
+```
+
+```
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: RT ~ Session + (1 + Session * Condition | ID) + (1 | Item)
+##    Data: data_tidy_RT_1
+## 
+## REML criterion at convergence: 19751.6
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.1089 -0.5484 -0.0787  0.4648  6.0629 
+## 
+## Random effects:
+##  Groups   Name                 Variance Std.Dev. Corr                         
+##  Item     (Intercept)          223439   472.69                                
+##  ID       (Intercept)          203842   451.49                                
+##           SessionA             119083   345.08    0.37                        
+##           SessionB             101049   317.88    0.54  0.28                  
+##           ConditionC2           55127   234.79   -0.46 -0.18 -0.37            
+##           ConditionC3           54842   234.18   -0.45 -0.18 -0.37  1.00      
+##           ConditionC4          152232   390.17   -0.45 -0.18 -0.37  1.00  1.00
+##           SessionA:ConditionC2   9867    99.33   -0.28  0.49 -0.11 -0.41 -0.41
+##           SessionB:ConditionC2  15221   123.37    0.31  0.57  0.15 -0.78 -0.78
+##           SessionA:ConditionC3  29013   170.33    0.07 -0.01  0.01 -0.86 -0.87
+##           SessionB:ConditionC3  19399   139.28    0.17  0.70  0.05 -0.65 -0.65
+##           SessionA:ConditionC4 181887   426.48    0.14 -0.18  0.11 -0.89 -0.89
+##           SessionB:ConditionC4 110907   333.03    0.34  0.39  0.20 -0.93 -0.93
+##  Residual                      191308   437.39                                
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##  -0.41                              
+##  -0.78  0.68                        
+##  -0.87  0.51  0.79                  
+##  -0.65  0.86  0.89  0.60            
+##  -0.89  0.33  0.64  0.96  0.43      
+##  -0.93  0.66  0.85  0.83  0.84  0.79
+##                                     
+## Number of obs: 1299, groups:  Item, 33; ID, 23
+## 
+## Fixed effects:
+##               Estimate Std. Error         df t value Pr(&gt;|t|)
+## (Intercept)  2.440e+03  4.181e+02  2.342e-07   5.836        1
+## SessionA     2.482e+02  4.243e+02  2.484e-07   0.585        1
+## SessionB    -6.559e+00  4.254e+02  2.509e-07  -0.015        1
+## 
+## Correlation of Fixed Effects:
+##          (Intr) SessnA
+## SessionA -0.947       
+## SessionB -0.945  0.985
+## optimizer (nloptwrap) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+```
+---
+##Model 2, effect of RT by session + condition
+
+
+``` r
+model_2_rt &lt;- lmer(RT ~ Session + Condition + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy_RT_1)
+```
+
+```
+## boundary (singular) fit: see help('isSingular')
+```
+
+```
+## Warning: Model failed to converge with 3 negative eigenvalues: -1.4e-04
+## -6.1e-04 -3.8e-02
+```
+
+``` r
+summary(model_2_rt)
+```
+
+```
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: RT ~ Session + Condition + (1 + Session * Condition | ID) + (1 |  
+##     Item)
+##    Data: data_tidy_RT_1
+## 
+## REML criterion at convergence: 19704.1
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.0694 -0.5455 -0.0876  0.4646  5.9646 
+## 
+## Random effects:
+##  Groups   Name                 Variance Std.Dev. Corr                         
+##  Item     (Intercept)          216470   465.3                                 
+##  ID       (Intercept)          107859   328.4                                 
+##           SessionA             271689   521.2     0.08                        
+##           SessionB             130885   361.8     0.44  0.70                  
+##           ConditionC2          163978   404.9    -0.14 -0.36 -0.36            
+##           ConditionC3          130753   361.6    -0.14 -0.37 -0.36  1.00      
+##           ConditionC4          342973   585.6    -0.14 -0.36 -0.36  1.00  1.00
+##           SessionA:ConditionC2 106269   326.0     0.02  0.41  0.34 -0.94 -0.94
+##           SessionB:ConditionC2  98284   313.5     0.15  0.48  0.40 -0.97 -0.98
+##           SessionA:ConditionC3  75791   275.3     0.02  0.26  0.17 -0.97 -0.97
+##           SessionB:ConditionC3 109775   331.3     0.04  0.53  0.39 -0.94 -0.94
+##           SessionA:ConditionC4 294813   543.0     0.16  0.12  0.21 -0.95 -0.95
+##           SessionB:ConditionC4 394011   627.7     0.12  0.42  0.37 -1.00 -1.00
+##  Residual                      189410   435.2                                 
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##  -0.94                              
+##  -0.97  0.97                        
+##  -0.97  0.91  0.95                  
+##  -0.94  0.99  0.98  0.90            
+##  -0.95  0.82  0.88  0.96  0.79      
+##  -1.00  0.95  0.98  0.96  0.96  0.92
+##                                     
+## Number of obs: 1299, groups:  Item, 33; ID, 23
+## 
+## Fixed effects:
+##               Estimate Std. Error         df t value Pr(&gt;|t|)    
+## (Intercept)  2.594e+03  3.607e+02  1.061e-05   7.192  0.99991    
+## SessionA    -1.688e+02  3.715e+02  1.197e-05  -0.454  0.99993    
+## SessionB    -5.205e+02  3.731e+02  1.218e-05  -1.395  0.99992    
+## ConditionC2  1.539e+02  4.298e+01  2.533e+01   3.580  0.00142 ** 
+## ConditionC3  1.100e+02  3.931e+01  3.640e+01   2.797  0.00819 ** 
+## ConditionC4  1.746e+02  3.795e+01  1.829e+02   4.600 7.86e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) SessnA SessnB CndtC2 CndtC3
+## SessionA    -0.919                            
+## SessionB    -0.913  0.982                     
+## ConditionC2 -0.034 -0.045 -0.062              
+## ConditionC3 -0.033 -0.064 -0.099  0.631       
+## ConditionC4 -0.004 -0.079 -0.080  0.313  0.380
+## optimizer (nloptwrap) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+```
+---
+##Model 3, effect of interaction with condition 
+
+
+``` r
+model_3_rt &lt;- lmer(RT ~ Session * Condition + (1 + Session * Condition | ID) + (1 | Item), data = data_tidy_RT_1)
+```
+
+```
+## boundary (singular) fit: see help('isSingular')
+```
+
+```
+## Warning: Model failed to converge with 18 negative eigenvalues: -1.1e-06
+## -2.2e-06 -4.1e-06 -7.7e-06 -8.4e-06 -1.9e-05 -2.5e-05 -5.4e-05 -6.4e-05
+## -9.8e-05 -5.4e-04 -7.2e-04 -1.1e-03 -1.9e-03 -2.1e-03 -3.7e-03 -8.6e-03
+## -4.1e+01
+```
+
+``` r
+summary(model_3_rt)
+```
+
+```
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: RT ~ Session * Condition + (1 + Session * Condition | ID) + (1 |  
+##     Item)
+##    Data: data_tidy_RT_1
+## 
+## REML criterion at convergence: 19629.7
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -3.0411 -0.5351 -0.0981  0.4727  5.9829 
+## 
+## Random effects:
+##  Groups   Name                 Variance Std.Dev. Corr                         
+##  Item     (Intercept)          217067   465.9                                 
+##  ID       (Intercept)          196247   443.0                                 
+##           SessionA             148507   385.4     0.18                        
+##           SessionB             124199   352.4     0.07  0.50                  
+##           ConditionC2          121743   348.9    -0.03 -0.01  0.00            
+##           ConditionC3           81981   286.3    -0.15 -0.04  0.02  0.12      
+##           ConditionC4          185095   430.2    -0.03 -0.11 -0.08 -0.06 -0.07
+##           SessionA:ConditionC2  55339   235.2    -0.23  0.04 -0.03 -0.95 -0.02
+##           SessionB:ConditionC2  64297   253.6     0.01  0.05 -0.08 -0.97 -0.07
+##           SessionA:ConditionC3  83662   289.2    -0.05 -0.16 -0.24  0.07 -0.92
+##           SessionB:ConditionC3  84638   290.9     0.06  0.21 -0.05  0.21 -0.91
+##           SessionA:ConditionC4 170075   412.4    -0.07 -0.26 -0.06 -0.03  0.08
+##           SessionB:ConditionC4 196794   443.6     0.05  0.21  0.07  0.03  0.05
+##  Residual                      189949   435.8                                 
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##  -0.05                              
+##   0.03  0.95                        
+##   0.11 -0.10 -0.06                  
+##  -0.04 -0.24 -0.22  0.90            
+##  -0.90  0.14  0.07 -0.03 -0.07      
+##  -0.99  0.09  0.01 -0.12  0.07  0.84
+##                                     
+## Number of obs: 1299, groups:  Item, 33; ID, 23
+## 
+## Fixed effects:
+##                        Estimate Std. Error         df t value Pr(&gt;|t|)
+## (Intercept)           2.686e+03  4.801e+02  2.270e-04   5.595    0.999
+## SessionA             -2.025e+02  4.935e+02  2.535e-04  -0.410    0.999
+## SessionB             -5.991e+02  4.909e+02  2.481e-04  -1.220    0.999
+## ConditionC2          -2.804e+02  4.170e+02  3.533e-03  -0.672    0.989
+## ConditionC3          -2.764e+02  3.662e+02  5.289e-04  -0.755    0.998
+## ConditionC4          -4.488e+02  4.846e+02  1.463e-02  -0.926    0.961
+## SessionA:ConditionC2  4.657e+02  4.210e+02  3.668e-03   1.106    0.987
+## SessionB:ConditionC2  4.176e+02  4.207e+02  3.659e-03   0.993    0.987
+## SessionA:ConditionC3  3.512e+02  3.704e+02  5.532e-04   0.948    0.998
+## SessionB:ConditionC3  4.286e+02  3.705e+02  5.539e-04   1.157    0.997
+## SessionA:ConditionC4  5.618e+02  4.892e+02  1.519e-02   1.148    0.957
+## SessionB:ConditionC4  6.517e+02  4.873e+02  1.495e-02   1.338    0.955
+## 
+## Correlation of Fixed Effects:
+##             (Intr) SessnA SessnB CndtC2 CndtC3 CndtC4 SA:CC2 SB:CC2 SA:CC3
+## SessionA    -0.945                                                        
+## SessionB    -0.950  0.982                                                 
+## ConditionC2 -0.165  0.160  0.162                                          
+## ConditionC3 -0.263  0.256  0.257  0.258                                   
+## ConditionC4 -0.142  0.138  0.139  0.090  0.107                            
+## SssnA:CndC2  0.163 -0.170 -0.167 -0.991 -0.255 -0.089                     
+## SssnB:CndC2  0.163 -0.159 -0.168 -0.991 -0.255 -0.089  0.986              
+## SssnA:CndC3  0.260 -0.271 -0.266 -0.255 -0.989 -0.106  0.263  0.255       
+## SssnB:CndC3  0.260 -0.251 -0.265 -0.255 -0.989 -0.106  0.258  0.264  0.980
+## SssnA:CndC4  0.141 -0.157 -0.145 -0.090 -0.106 -0.991  0.093  0.088  0.114
+## SssnB:CndC4  0.142 -0.133 -0.142 -0.090 -0.107 -0.994  0.089  0.095  0.105
+##             SB:CC3 SA:CC4
+## SessionA                 
+## SessionB                 
+## ConditionC2              
+## ConditionC3              
+## ConditionC4              
+## SssnA:CndC2              
+## SssnB:CndC2              
+## SssnA:CndC3              
+## SssnB:CndC3              
+## SssnA:CndC4  0.101       
+## SssnB:CndC4  0.112  0.983
+## optimizer (nloptwrap) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+```
+
+---
+##Anova test
+
+``` r
+anova(model_0_rt, model_1_rt, model_2_rt, model_3_rt, test = "Chisq")
+```
+
+```
+## refitting model(s) with ML (instead of REML)
+```
+
+```
+## Warning in commonArgs(par, fn, control, environment()): maxfun &lt; 10 *
+## length(par)^2 is not recommended.
+```
+
+```
+## Warning in optwrap(optimizer, devfun, x@theta, lower = x@lower, calc.derivs =
+## TRUE, : convergence code 1 from bobyqa: bobyqa -- maximum number of function
+## evaluations exceeded
+```
+
+```
+## Warning in commonArgs(par, fn, control, environment()): maxfun &lt; 10 *
+## length(par)^2 is not recommended.
+```
+
+```
+## Warning in optwrap(optimizer, devfun, x@theta, lower = x@lower, calc.derivs =
+## TRUE, : convergence code 1 from bobyqa: bobyqa -- maximum number of function
+## evaluations exceeded
+```
+
+```
+## Warning in commonArgs(par, fn, control, environment()): maxfun &lt; 10 *
+## length(par)^2 is not recommended.
+```
+
+```
+## Warning in optwrap(optimizer, devfun, x@theta, lower = x@lower, calc.derivs =
+## TRUE, : convergence code 1 from bobyqa: bobyqa -- maximum number of function
+## evaluations exceeded
+```
+
+```
+## Warning in commonArgs(par, fn, control, environment()): maxfun &lt; 10 *
+## length(par)^2 is not recommended.
+```
+
+```
+## Warning in optwrap(optimizer, devfun, x@theta, lower = x@lower, calc.derivs =
+## TRUE, : convergence code 1 from bobyqa: bobyqa -- maximum number of function
+## evaluations exceeded
+```
+
+```
+## Data: data_tidy_RT_1
+## Models:
+## model_0_rt: RT ~ 1 + (1 + Session * Condition | ID) + (1 | Item)
+## model_1_rt: RT ~ Session + (1 + Session * Condition | ID) + (1 | Item)
+## model_2_rt: RT ~ Session + Condition + (1 + Session * Condition | ID) + (1 | Item)
+## model_3_rt: RT ~ Session * Condition + (1 + Session * Condition | ID) + (1 | Item)
+##            npar   AIC   BIC  logLik deviance   Chisq Df Pr(&gt;Chisq)    
+## model_0_rt   81 19951 20369 -9894.3    19789                          
+## model_1_rt   83 19951 20380 -9892.4    19785  3.8699  2  0.1444280    
+## model_2_rt   86 19937 20382 -9882.5    19765 19.6611  3  0.0001995 ***
+## model_3_rt   92 19942 20418 -9879.0    19758  6.9866  6  0.3220905    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
